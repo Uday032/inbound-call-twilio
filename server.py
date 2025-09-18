@@ -1,9 +1,3 @@
-#
-# Copyright (c) 2025, Daily
-#
-# SPDX-License-Identifier: BSD 2-Clause License
-#
-
 import argparse
 import json
 
@@ -51,7 +45,7 @@ async def get_metrics():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Pipecat Twilio Chatbot Server")
+    parser = argparse.ArgumentParser(description="Inbound twilio call Server")
     parser.add_argument(
         "-t", "--test", action="store_true", default=False, help="set the server in testing mode"
     )

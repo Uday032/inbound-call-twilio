@@ -214,10 +214,8 @@ class TwilioBot:
 
         @stt.event_handler("on_transcript")
         async def on_transcript(service, result):
-            # Be more specific about what constitutes final transcript
             is_final = False
             print(service, is_final)
-            # Check various possible final indicators
             if result.get("is_final", False):
                 is_final = True
             elif result.get("final", False):
