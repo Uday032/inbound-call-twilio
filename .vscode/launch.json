@@ -1,0 +1,87 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug FastAPI App",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "HOST": "0.0.0.0",
+        "PORT": "8000",
+        "DEBUG": "true",
+        "ENVIRONMENT": "local"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "justMyCode": false,
+      "stopOnEntry": false,
+      "pythonPath": "${workspaceFolder}/venv/bin/python"
+    },
+    {
+      "name": "Debug FastAPI with Uvicorn",
+      "type": "python",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--reload",
+        "--log-level",
+        "debug"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "ENVIRONMENT": "local"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "justMyCode": false,
+      "pythonPath": "${workspaceFolder}/venv/bin/python"
+    },
+    {
+      "name": "Debug Production Mode",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "HOST": "0.0.0.0",
+        "PORT": "8000",
+        "DEBUG": "false",
+        "ENVIRONMENT": "production"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "justMyCode": false,
+      "stopOnEntry": false,
+      "pythonPath": "${workspaceFolder}/venv/bin/python"
+    },
+    {
+      "name": "Debug with Custom Port",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "HOST": "0.0.0.0",
+        "PORT": "3000",
+        "DEBUG": "true",
+        "ENVIRONMENT": "local"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "justMyCode": false,
+      "stopOnEntry": false,
+      "pythonPath": "${workspaceFolder}/venv/bin/python"
+    }
+  ]
+}

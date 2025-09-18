@@ -1,197 +1,111 @@
-# Twilio Inbound Call Handler
+# Pipecat Twilio AI Agent
 
-A FastAPI-based server for handling inbound calls through Twilio. This application provides webhook endpoints to process incoming calls, gather user input, and route calls appropriately.
+This project is a FastAPI-based chatbot that integrates with Twilio to handle WebSocket connections and provide real-time communication. The project includes endpoints for starting a call and handling WebSocket connections.
+Customize the bot.py file to change the AI agent's behavior.
+This is setup to save audio recordings to the server_0_recording.wav file.
 
-## Features
+## Installation
 
-- **Inbound Call Handling**: Process incoming calls from Twilio
-- **Interactive Voice Response (IVR)**: Menu system with digit input
-- **Call Routing**: Route calls to different departments (Sales, Support, Operator)
-- **Recording**: Record voicemail messages
-- **Status Tracking**: Monitor call status updates
-- **Health Checks**: Built-in health monitoring endpoints
-
-## Setup
-
-### 1. Install Dependencies
-
-Make sure you have Python 3.8+ installed and activate your virtual environment:
-
-```bash
-# Activate virtual environment (if not already activated)
+```console
+python -m venv venv
 source venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Environment Configuration
+Install ngrok: Follow the instructions on the [ngrok website](https://ngrok.com/download) to download and install ngrok.
 
-Copy the example environment file and configure your Twilio credentials:
+## Setup Environment
 
-```bash
-cp env.example .env
+In this project's directory, run the following command to copy the `.env.example` file to `.env`:
+
+```console
+cp .env.example .env
 ```
 
-Edit the `.env` file with your Twilio credentials:
+Edit the `.env` file with your own values.
 
-```env
-# Twilio Configuration
-TWILIO_ACCOUNT_SID=your_account_sid_here
-TWILIO_AUTH_TOKEN=your_auth_token_here
-TWILIO_PHONE_NUMBER=your_twilio_phone_number_here
+### OpenAI
 
-# Server Configuration
-HOST=0.0.0.0
-PORT=8000
-DEBUG=True
+Visit https://platform.openai.com to get your `OPENAI_API_KEY`.
+
+### Deepgram
+
+Visit https://deepgram.com to get your `DEEPGRAM_API_KEY`.
+
+### ElevenLabs
+
+Visit https://elevenlabs.io to get your `ELEVEN_API_KEY` and `ELEVEN_VOICE_ID`.
+
+## Configure Twilio URLs
+
+1. **Start ngrok**:
+   In a new terminal, start ngrok to tunnel the local server:
+
+   ```sh
+   ngrok http 8765
+   ```
+
+2. **Update the Twilio Webhook**:
+
+   - Go to your Twilio phone number's configuration page
+   - Under "Voice Configuration", in the "A call comes in" section:
+     - Select "Webhook" from the dropdown
+     - Enter your ngrok URL (e.g., http://<ngrok_url>)
+     - Ensure "HTTP POST" is selected
+   - Click Save at the bottom of the page
+
+3. **Configure streams.xml**:
+   - Copy the template file to create your local version:
+     ```sh
+     cp templates/streams.xml.template templates/streams.xml
+     ```
+   - In `templates/streams.xml`, replace `<your server url>` with your ngrok URL (without `https://`)
+   - The final URL should look like: `wss://abc123.ngrok.io/ws`
+
+## Usage
+
+**Run the FastAPI application**:
+
+```sh
+# Make sure you’re in the project directory and your virtual environment is activated
+python server.py
 ```
 
-### 3. Run the Server
+The server will start on port 8765. Keep this running while you test with Twilio.
 
-You can run the server in several ways:
+To start a call, simply make a call to your configured Twilio phone number. The webhook URL will direct the call to your FastAPI application, which will handle it accordingly.
 
-**Option 1: Using the run script**
+## Testing
 
-```bash
-python run.py
+It is also possible to automatically test the server without making phone calls by using a software client.
+
+First, update `templates/streams.xml` to point to your server's websocket endpoint. For example:
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Connect>
+    <Stream url="ws://localhost:8765/ws"></Stream>
+  </Connect>
+  <Pause length="40"/>
+</Response>
 ```
 
-**Option 2: Using uvicorn directly**
+Then, start the server with `-t` to indicate we are testing:
 
-```bash
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```sh
+# Make sure you’re in the project directory and your virtual environment is activated
+python server.py -t
 ```
 
-**Option 3: Using the main module**
+Finally, just point the client to the server's URL:
 
-```bash
-python main.py
+```sh
+python client.py -u http://localhost:8765 -c 2
 ```
 
-The server will start on `http://localhost:8000` by default.
+where `-c` allows you to create multiple concurrent clients.
 
-## API Endpoints
+## Note
 
-### Health Check
-
-- `GET /` - Basic health check
-- `GET /health` - Detailed health status
-
-### Twilio Webhooks
-
-- `POST /webhook/voice` - Handle incoming calls
-- `POST /webhook/gather` - Process user input
-- `POST /webhook/operator` - Handle operator transfer
-- `POST /webhook/recording` - Process recorded messages
-- `POST /webhook/status` - Handle call status updates
-
-## Twilio Configuration
-
-### 1. Set up your Twilio Phone Number
-
-1. Log into your [Twilio Console](https://console.twilio.com/)
-2. Go to Phone Numbers → Manage → Active numbers
-3. Click on your phone number
-4. Set the webhook URL for incoming calls to: `https://your-domain.com/webhook/voice`
-5. Set the webhook URL for call status to: `https://your-domain.com/webhook/status`
-
-### 2. For Local Development
-
-Use ngrok or similar tool to expose your local server:
-
-```bash
-# Install ngrok (if not already installed)
-# Download from https://ngrok.com/
-
-# Expose your local server
-ngrok http 8000
-```
-
-Then use the ngrok URL in your Twilio webhook configuration.
-
-## API Documentation
-
-Once the server is running, you can access the interactive API documentation at:
-
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-
-## Call Flow
-
-1. **Incoming Call**: Twilio sends a webhook to `/webhook/voice`
-2. **Greeting**: Caller hears a greeting message
-3. **Menu**: Caller is prompted to press 1 for sales, 2 for support, or 0 for operator
-4. **Routing**: Based on input, call is routed to appropriate handler
-5. **Recording**: If no operator is available, caller can leave a message
-6. **Status Updates**: Call status is tracked via `/webhook/status`
-
-## Customization
-
-### Adding New Menu Options
-
-Edit the `handle_inbound_call` function in `main.py` to add new menu options:
-
-```python
-gather.say("Press 1 for sales, press 2 for support, press 3 for billing, or press 0 to speak with an operator.")
-```
-
-Then update the `handle_gather` function to process the new option:
-
-```python
-elif digits == "3":
-    response.say("Thank you for choosing billing. Our billing team will assist you.")
-```
-
-### Customizing Voice and Language
-
-You can customize the voice and language in the TwiML responses:
-
-```python
-response.say("Hello! Thank you for calling.", voice="alice", language="en-US")
-```
-
-## Error Handling
-
-The application includes comprehensive error handling:
-
-- Webhook validation
-- Twilio API error handling
-- Logging for debugging
-- Graceful fallbacks for failed operations
-
-## Logging
-
-Logs are written to the console with different levels:
-
-- INFO: Normal operations
-- WARNING: Non-critical issues
-- ERROR: Errors that need attention
-
-## Development
-
-### Running in Development Mode
-
-Set `DEBUG=True` in your `.env` file to enable:
-
-- Auto-reload on code changes
-- Detailed error messages
-- Debug logging
-
-### Testing Webhooks Locally
-
-Use tools like ngrok, localtunnel, or similar to expose your local server for Twilio webhook testing.
-
-## Production Deployment
-
-For production deployment:
-
-1. Set `DEBUG=False` in your environment
-2. Use a production ASGI server like Gunicorn with Uvicorn workers
-3. Set up proper logging
-4. Use environment variables for sensitive configuration
-5. Set up monitoring and health checks
-
-## License
-
-This project is open source and available under the MIT License.
+This follows the the [Pipecat Twilio Example](https://github.com/pipecat-ai/pipecat/blob/main/examples/twilio-chatbot/README.md) repository.
