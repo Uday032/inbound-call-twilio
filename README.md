@@ -69,7 +69,7 @@ python call_stress_test.py
 ### 6. **Check metrics**
 
 ```bash
-curl http://localhost:8000/metrics
+curl http://localhost:8000/metrics // Some things need to be fixed here. but you can see all the processing in the console.
 ```
 
 ## Architecture & Trade-Offs
