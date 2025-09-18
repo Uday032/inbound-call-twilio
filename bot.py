@@ -206,7 +206,7 @@ class TwilioBot:
         async def on_client_disconnected(transport, client):
             await task.cancel()
 
-         @stt.event_handler("on_transcript")
+        @stt.event_handler("on_transcript")
         async def on_transcript(service, result):
             # Be more specific about what constitutes final transcript
             is_final = False
