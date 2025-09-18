@@ -8,7 +8,7 @@ import argparse
 import json
 
 import uvicorn
-from bot import run_bot
+from bot import TwilioBot, run_bot
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import HTMLResponse
@@ -39,7 +39,9 @@ async def websocket_endpoint(websocket: WebSocket):
     print(call_data, flush=True)
     stream_sid = call_data["start"]["streamSid"]
     print("WebSocket connection accepted")
-    await run_bot(websocket, stream_sid, app.state.testing)
+    # Prefer class usage; keep fallback function for backwards-compatibility
+    bot = TwilioBot()
+    await bot.run(websocket, stream_sid, app.state.testing)
 
 
 if __name__ == "__main__":
