@@ -33,6 +33,8 @@ from pipecat.transports.network.fastapi_websocket import (
 from pipecat.audio.vad.vad_analyzer import VADParams
 from time import perf_counter
 
+from constants import VECTOR_DB
+
 
 class MetricsCollector:
     def __init__(self):
@@ -128,7 +130,7 @@ class TwilioBot:
     def __init__(self, metrics: MetricsCollector | None = None):
         self.default_system_message = {
             "role": "system",
-            "content": "You are a helpful assistant named Tasha. Your output will be converted to audio so don't include special characters in your answers. Respond with a short short sentence.",
+            "content": "You are a helpful assistant named Tasha. Your output will be converted to audio so don't include special characters in your answers. Respond with a short short sentence. Here is more details to answer user questions: "+ VECTOR_DB,
         }
         self.metrics = metrics or MetricsCollector()
 
@@ -206,11 +208,13 @@ class TwilioBot:
         async def on_client_disconnected(transport, client):
             await task.cancel()
 
+        
+
         @stt.event_handler("on_transcript")
         async def on_transcript(service, result):
             # Be more specific about what constitutes final transcript
             is_final = False
-            
+            print(service, is_final)
             # Check various possible final indicators
             if result.get("is_final", False):
                 is_final = True
