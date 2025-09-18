@@ -234,7 +234,7 @@ class TwilioBot:
 
         @audiobuffer.event_handler("on_audio_data")
         async def on_audio_data(buffer, audio, sample_rate, num_channels):
-            if self.metrics.awaiting_tts_after_user or len(metrics.response_latencies_ms) == 0:
+            if self.metrics.awaiting_tts_after_user or len(self.metrics.response_latencies_ms) == 0:
                 self.metrics.record_tts_audio_chunk(len(audio), sample_rate, num_channels)
 
         @tts.event_handler("on_tts_started")
