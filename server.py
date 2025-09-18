@@ -8,12 +8,13 @@ import argparse
 import json
 
 import uvicorn
-from bot import TwilioBot, run_bot
+from bot import TwilioBot, MetricsCollector
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import HTMLResponse
 
 app = FastAPI()
+metrics_collector = MetricsCollector()
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,9 +40,14 @@ async def websocket_endpoint(websocket: WebSocket):
     print(call_data, flush=True)
     stream_sid = call_data["start"]["streamSid"]
     print("WebSocket connection accepted")
-    # Prefer class usage; keep fallback function for backwards-compatibility
-    bot = TwilioBot()
+    metrics_collector.record_call_attempt()
+    bot = TwilioBot(metrics=metrics_collector)
     await bot.run(websocket, stream_sid, app.state.testing)
+
+
+@app.get("/metrics")
+async def get_metrics():
+    return metrics_collector.get_metrics()
 
 
 if __name__ == "__main__":
