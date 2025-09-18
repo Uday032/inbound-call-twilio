@@ -30,6 +30,7 @@ from pipecat.transports.network.fastapi_websocket import (
     FastAPIWebsocketParams,
     FastAPIWebsocketTransport,
 )
+from pipecat.audio.vad.vad_analyzer import VADParams
 
 load_dotenv(override=True)
 
@@ -44,19 +45,28 @@ async def run_bot(websocket_client: WebSocket, stream_sid: str, testing: bool):
             audio_out_enabled=True,
             add_wav_header=False,
             vad_enabled=True,
-            vad_analyzer=SileroVADAnalyzer(),
+            vad_analyzer=SileroVADAnalyzer(params=VADParams(start_secs=0.15, stop_secs=0.2)),
             vad_audio_passthrough=True,
             serializer=TwilioFrameSerializer(stream_sid),
         ),
     )
 
-    llm = OpenAILLMService(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o")
+    llm = OpenAILLMService(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o-mini", max_tokens=64)
 
-    stt = DeepgramSTTService(api_key=os.getenv("DEEPGRAM_API_KEY"), audio_passthrough=True)
+    stt = DeepgramSTTService(
+        api_key=os.getenv("DEEPGRAM_API_KEY"),
+        audio_passthrough=True,
+        model="nova-2-phonecall",
+        interim_results=True,
+        punctuate=False,
+        smart_format=False,
+        endpointing=50 
+    )
 
     tts = CartesiaTTSService(
         api_key=os.getenv("CARTESIA_API_KEY"),
         voice_id="71a7ad14-091c-4e8e-a314-022ece01c121",  # British Reading Lady
+        stream=True  
     )
 
     messages = [
