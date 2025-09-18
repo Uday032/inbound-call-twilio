@@ -35,6 +35,7 @@ from time import perf_counter
 
 from constants import VECTOR_DB
 
+from pipecat.observers.loggers.user_bot_latency_log_observer import UserBotLatencyLogObserver
 
 class MetricsCollector:
     def __init__(self):
@@ -194,7 +195,10 @@ class TwilioBot:
                 audio_in_sample_rate=8000,
                 audio_out_sample_rate=8000,
                 allow_interruptions=True,
+                enable_metrics=True,
+                enable_usage_metrics=True,
             ),
+            observers=[UserBotLatencyLogObserver]  # Add observer here
         )
 
         @transport.event_handler("on_client_connected")
